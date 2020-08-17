@@ -25,6 +25,10 @@ const RegistSchema = mongoose.Schema({
         type:String,
         required:true
     },
+    resetPasswordLink:{
+        data:String,
+        default:''
+    },
     date:{
         type:Date,
         default:Date.now
