@@ -12,7 +12,7 @@ app.use(cors())
 
 const postingRoute = require('./routes/socialPosting')
 const registRoute = require('./routes/Register')
-app.use('/sosmed',postingRoute)
+app.use('/data',postingRoute)
 app.use('/',registRoute)
 
 // app.use(express.json())
@@ -58,16 +58,5 @@ mongoose.connect(
     process.env.DB_CONNECTION, {useNewUrlParser: true},()=>
     console.log('database connect'))
     
-
-    
-// const MongoClient = require('mongodb').MongoClient;
-// const uri = process.env.DB_CONNECTION;
-// const client = new MongoClient(uri, {useNewUrlParser: true});
-// client.connect(err => {
-//   const collection = client.db("project").collection("projectSocialmedia");
-//   // perform actions on the collection object
-//   client.close();
-// });
-
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))

@@ -19,6 +19,7 @@ router.post("/register", async (req, res) => {
     fullname: req.body.fullname,
     email: req.body.email,
     password: hashPassword,
+    role: 'murid'
   });
   try {
     const savedRegister = await register.save();
@@ -43,7 +44,7 @@ router.post("/login", async (req, res) => {
     const validPass = await bcrypt.compare(req.body.password, user.password)
     //alert passoword if pasword not same with password in database
     if(!validPass) return res.status(400).send("Password is wrong")
-    const token = jwt.sign({id:user.id,email:user.email,fullname:user.fullname}, process.env.TOKEN_SECRET);
+    const token = jwt.sign({id:user.id,email:user.email,fullname:user.fullname,role:user.role}, process.env.TOKEN_SECRET);
     var decoded = jwt.verify(token, process.env.TOKEN_SECRET );
     console.log(decoded)
     
