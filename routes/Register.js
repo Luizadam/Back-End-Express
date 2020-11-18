@@ -35,20 +35,22 @@ router.post("/login", async (req, res) => {
     if(error) return res.status(400).send(error.details )
 
     //make sure email available in database
-    const user = await Regitser.findOne({email:req.body.email})
+    const user = await  Regitser.findOne({email:req.body.email})
 
     //if password wrong then status bad request
-    if(!user) return res.status(400).send("email or password is wrong")
+    if(!user) return res.status(400).send({message:"email or password is wrong"})
 
     //compare password 
-    const validPass = await bcrypt.compare(req.body.password, user.password)
+    const validPass = await  bcrypt.compare(req.body.password, user.password)
     //alert passoword if pasword not same with password in database
     if(!validPass) return res.status(400).send("Password is wrong")
     const token = jwt.sign({id:user.id,email:user.email,fullname:user.fullname,role:user.role}, process.env.TOKEN_SECRET);
     var decoded = jwt.verify(token, process.env.TOKEN_SECRET );
-    console.log(decoded)
+    // var lol = Object.entries(decoded)
+    // console.log(res)
+
     
-    res.header('auth-token',token).send({token:token,data:decoded});
+    res.header('auth-token',token).send({token:token,user:decoded});
 });
 
 function checkToken(token) {
