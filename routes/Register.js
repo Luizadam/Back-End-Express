@@ -19,7 +19,7 @@ router.post("/register", async (req, res) => {
     fullname: req.body.fullname,
     email: req.body.email,
     password: hashPassword,
-    role: 'murid'
+    role:req.body.role
   });
   try {
     const savedRegister = await register.save();
@@ -53,13 +53,33 @@ router.post("/login", async (req, res) => {
     res.header('auth-token',token).send({token:token,user:decoded});
 });
 
-function checkToken(token) {
-    return new Promise((resolve, reject) => {
-      jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-        if (err) return reject(err);
-        return resolve(decoded);
-        console.log(decoded)
-      });
-    });
-  }
+
+router.get("/user",(req,res)=>{
+  Regitser.find((err,data)=>{
+    if(!err) {
+      res.json(data)
+    }else{
+      res.send(err)
+    }
+  })
+});
+
+router.get("/user/detail/:id",(req,res)=>{
+  Regitser.findById(req.params.id,(err,data)=>{
+    if(!err) {
+      res.json(data)
+    }else{
+      res.send(err)
+    }
+  })
+})
+// function checkToken(token) {
+//     return new Promise((resolve, reject) => {
+//       jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+//         if (err) return reject(err);
+//         return resolve(decoded);
+//         console.log(decoded)
+//       });
+//     });
+//   }
 module.exports = router;

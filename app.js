@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3001;
+// const io = require('socket.io')(port)
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors')
@@ -14,45 +15,23 @@ const postingRoute = require('./routes/socialPosting')
 const registRoute = require('./routes/Register')
 app.use('/data',postingRoute)
 app.use('/',registRoute)
-
-// app.use(express.json())
-// const jadwal = [
-//     {id:1,name:"aku"},
-//     {id:2,name:"kamu"},
-//     {id:3,name:"kita"}
-// ]
 app.get('/', (req, res) => res.send('Hello World!'))
+app.use('/uploads', express.static('uploads'));
 
-// app.get('/iniapi/pakeid/:id', (req,res) => {
-//     res.send(req.params.id);
-// })
-
-// app.get('/api/jadwal/',(req,res)=>{
-//     res.send(jadwal)
-// })
-
-// app.get ('/api/jadwal/:id',(req,res) => {
-//     const jadwals = jadwal.find(obj => obj.id === parseInt(req.params.id))
-//     if (!jadwals) res.status(404).send("Object Not Found.")
-//     res.send(jadwals)
-// })
-
-// app.post ('/api/jadwal',(req,res) => {
-//  const jadwals = {
-//      id:jadwal.length +1,
-//      name: req.body.name
-//  }
-//  jadwal.push(jadwals)
-//  res.send(jadwals)
-
-// })
-
-// app.put ('/api/jadwal/:id',(req,res) => {
-//     const jadwals = jadwal.find(obj => obj.id === parseInt(req.params.id))
-//     if (!jadwals) res.status(404).send("Object Not Found.")
-//     jadwals.name = req.body.name
-//     res.send(jadwals)
-// })
+// io.on('connection', socket => {
+//     const id = socket.handshake.query.id
+//     socket.join(id)
+  
+//     socket.on('send-message', ({ recipients, text }) => {
+//       recipients.forEach(recipient => {
+//         const newRecipients = recipients.filter(r => r !== recipient)
+//         newRecipients.push(id)
+//         socket.broadcast.to(recipient).emit('receive-message', {
+//           recipients: newRecipients, sender: id, text
+//         })
+//       })
+//     })
+//   })
 
 mongoose.connect(
     process.env.DB_CONNECTION, {useNewUrlParser: true},()=>

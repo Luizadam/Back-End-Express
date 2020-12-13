@@ -27,6 +27,7 @@ const RegistSchema = mongoose.Schema({
     },
     role:{
         type:String,
+        required:true
     },
     date:{
         type:Date,
