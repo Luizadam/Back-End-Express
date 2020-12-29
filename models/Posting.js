@@ -10,9 +10,12 @@ const PostSchema = mongoose.Schema({
         required:true
     },
    
-    postImage:{
-        type:String,
-        required:true
+    // postImage:{
+    //     type:String,
+    //     required:true
+    // },
+    createdBy:{
+        type:ObjectId
     },
      likes:[{type:ObjectId,ref:"User"}],
      comments:[{

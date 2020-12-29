@@ -12,28 +12,27 @@ const storage = multer.diskStorage({
     },
     filename: function(req, file, cb) {
     //   cb(null, new Date().toISOString() + file.originalname);
+    console.log(file)
       cb(null, new Date().toISOString().replace(/:/g, '-')+ file.originalname);
     }
   });
   
   const fileFilter = (req, file, cb) => {
-    // reject a file
     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
       cb(null, true);
-    } else {
+    } else {  
       cb(null, false);
     }
   };
   
   const upload = multer({
     storage: storage,
-    limits: {
-      fileSize: 1024 * 1024 * 5
-    },
-    fileFilter: fileFilter
+    // limits: {
+    //   fileSize: 1024 * 1024 * 5
+    // }
   });
 
-router.get('/posting',authLogin,(req,res) => {
+router.get('/posting',(req,res) => {
     
     Posting.find((err,docs) =>{
         if(!err){
@@ -47,19 +46,21 @@ router.get('/posting',authLogin,(req,res) => {
 //posting socialmedia
 
 router.post('/posting',upload.single('postImage'),(req,res) => {
-    console.log(req)
+    console.log(req.file)
+    // console.log(req)
     const posting = new Posting ({
         title:req.body.title,
         desc:req.body.desc,
-        postImage:req.file.filename
+        createdBy:req.body.createdBy
+        // postImage:req.file.filename
     });
     posting.save()
-    .then(data =>{
+    .then(data =>{  
         console.log(data)
-        res.json(data);
+        res.status(200).send({data:data,message:"Berhasil Membuat Data"})
     })
     .catch(err => {
-        res.json({message:err})
+        res.status(400).send({Error:err,message:"Kesalahan Membuat Data"})
     });
 })
 
@@ -72,6 +73,20 @@ router.get ('/posting/:id',(req,res) =>{
             res.json(docs)
         }else{
             res.json(err)
+        }
+    })
+})
+
+// get data by createdBy 
+router.get ('/posting/profile/:id',(req,res) =>{
+    Posting.find({createdBy:req.params.id},(err,docs)=>{
+        if(!err){
+            
+            res.status(200).send({message:"Get Data Berhasil",data:docs})
+            
+        }else{
+            res.status(500).send({message:"Periksa Kembali Data anda",Error:err})
+            // res.json(err)
         }
     })
 })
@@ -94,14 +109,14 @@ router.put ('/posting/:id',(req,res) => {
         })
     })
 
-//Delete by id 
 
+//Delete by id 
 router.delete('/posting/:id',(req,res)=>{
     Posting.remove({_id:req.params.id},(err,docs) =>{
         if(!err){
-            res.json(docs)
+            res.status(200).json({ message: 'Berhasil Menghapus Data' });
         }else{
-            res.json(err)
+            res.status(500).json({ message: 'Terjadi Kesalahan Teknis' });
         }
     })
 })
