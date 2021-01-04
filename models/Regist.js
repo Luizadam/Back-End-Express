@@ -1,3 +1,4 @@
+const { string } = require('@hapi/joi');
 const mongoose = require('mongoose')
 
 
@@ -25,9 +26,9 @@ const RegistSchema = mongoose.Schema({
         type:String,
         required:true
     },
-    role:{
-        type:String,
-        required:true
+    resetPasswordLink:{
+        data:String,
+        default:''
     },
     date:{
         type:Date,

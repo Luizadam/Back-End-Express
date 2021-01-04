@@ -12,9 +12,9 @@ const storage = multer.diskStorage({
     },
     filename: function(req, file, cb) {
     //   cb(null, new Date().toISOString() + file.originalname);
-    console.log(file)
       cb(null, new Date().toISOString().replace(/:/g, '-')+ file.originalname);
     }
+    
   });
   
   const fileFilter = (req, file, cb) => {
@@ -27,9 +27,9 @@ const storage = multer.diskStorage({
   
   const upload = multer({
     storage: storage,
-    // limits: {
-    //   fileSize: 1024 * 1024 * 5
-    // }
+    limits: {
+      fileSize: 1024 * 1024 * 5
+    }
   });
 
 router.get('/posting',(req,res) => {
@@ -45,23 +45,41 @@ router.get('/posting',(req,res) => {
 
 //posting socialmedia
 
-router.post('/posting',upload.single('postImage'),(req,res) => {
+router.post('/posting',authLogin,upload.single('postImage'),(req,res) => {
     console.log(req.file)
-    // console.log(req)
-    const posting = new Posting ({
-        title:req.body.title,
-        desc:req.body.desc,
-        createdBy:req.body.createdBy
-        // postImage:req.file.filename
-    });
-    posting.save()
-    .then(data =>{  
-        console.log(data)
-        res.status(200).send({data:data,message:"Berhasil Membuat Data"})
-    })
-    .catch(err => {
-        res.status(400).send({Error:err,message:"Kesalahan Membuat Data"})
-    });
+    if(req.file !== undefined || null){
+        const posting = new Posting ({
+            title:req.body.title,
+            desc:req.body.desc,
+            createdBy:req.body.createdBy,
+            postImage:req.file.filename,
+            createdByName:req.user.fullname
+        });
+        posting.save()
+        .then(data =>{  
+            console.log(data)
+            res.status(200).send({data:data,message:"Berhasil Membuat Data"})
+        })
+        .catch(err => {
+            res.status(400).send({Error:err,message:"Kesalahan Membuat Data"})
+        });
+    }else if(req.file === undefined){
+        const posting = new Posting ({
+            title:req.body.title,
+            desc:req.body.desc,
+            createdBy:req.body.createdBy,
+            createdByName:req.user.fullname
+        });
+        posting.save()
+        .then(data =>{  
+            console.log(data)
+            res.status(200).send({data:data,message:"Berhasil Membuat Data"})
+        })
+        .catch(err => {
+            res.status(400).send({Error:err,message:"Kesalahan Membuat Data"})
+        });
+    }
+    
 })
 
 
@@ -139,7 +157,8 @@ router.put('/like',authLogin,(req,res)=>{
 router.put('/comment',authLogin,(req,res)=>{
     const comment = {
         text:req.body.text,
-        postedBy:req.user._id
+        postedBy:req.user._id,
+        postedByName:req.user.fullname
     };
     Posting.findByIdAndUpdate(req.body.postId,{
         $push:{comments:comment}

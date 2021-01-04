@@ -5,6 +5,7 @@ const Regitser = require("../models/Regist");
 const {registerValidate,loginValidate} = require('../validation');
 const { find } = require("../models/Regist");
 const jwt = require('jsonwebtoken');
+const { kirimEmail } = require('../helpers/index')
 const saltRounds = 10;
 
 
@@ -18,8 +19,7 @@ router.post("/register", async (req, res) => {
   const register = new Regitser({
     fullname: req.body.fullname,
     email: req.body.email,
-    password: hashPassword,
-    role:req.body.role
+    password: hashPassword
   });
   try {
     const savedRegister = await register.save();
@@ -46,8 +46,6 @@ router.post("/login", async (req, res) => {
     if(!validPass) return res.status(400).send("Password is wrong")
     const token = jwt.sign({id:user.id,email:user.email,fullname:user.fullname,role:user.role}, process.env.TOKEN_SECRET);
     var decoded = jwt.verify(token, process.env.TOKEN_SECRET );
-    // var lol = Object.entries(decoded)
-    // console.log(res)
 
     
     res.header('auth-token',token).send({token:token,user:decoded});
@@ -82,4 +80,49 @@ router.get("/user/detail/:id",(req,res)=>{
 //       });
 //     });
 //   }
+
+router.put('/forgotPass', async (req,res) => {
+  
+  const user = await Regitser.findOne({email:req.body.email})
+try{
+  if (!user)return res.status(404).json ({
+    message: "email not found"
+  })
+
+  const token = jwt.sign({id:user.id},process.env.TOKEN_SECRET);
+
+  await user.updateOne({resetPasswordLink:token})
+  const templateEmail={
+    from:"luizDev ",
+    to:req.body.email,
+    subject:"Link for reset password",
+    html:`<p>silakan klik link di bawah ini untuk forgot password</p><p>http://localhost:4200/resetpassword/${token}</p>`
+  }
+  kirimEmail(templateEmail)
+  return res.status(200).json({
+    status:true,
+    message:"link reset password berhasil terkirim"
+  })
+}
+catch(err){
+  console.log(err)
+}
+  
+
+})
+
+router.put('/resetpassword', async (req,res) => {
+  const {token,password} = req.body
+  const user   = await Regitser.findOne({resetPasswordLink:token})
+  console.log(user)
+  if(user){
+    const hashPassword = await bcrypt.hash(password,10)
+    user.password = hashPassword
+     await user.save()
+    return res.status(201).json({
+      status:true,
+      message:"perubahan berhasil!"
+    })
+  }
+})
 module.exports = router;
